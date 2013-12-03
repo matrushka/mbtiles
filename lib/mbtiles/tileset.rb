@@ -15,12 +15,8 @@ class MBTiles::Tileset
     @metadata ||= database[:metadata].to_hash(:name, :value).symbolize_keys
   end
 
-  def tiles
-    database[:tiles].select(:zoom_level => :z, :tile_column => :x, :tile_row => :y, :tile_data => :data)
-  end
-
   def tile_at(x, y, z)
-    tiles.where(x: x, y: y, z: z).first
+    database[:tiles].where(tile_column: x, tile_row: y, zoom_level: z).first
   end
 
   def load!
@@ -31,13 +27,7 @@ class MBTiles::Tileset
     @database.present?
   end
 
-  private
-
   def database
-    @database ||= Sequel.connect(connection_string)
-  end
-
-  def connection_string
-    "sqlite://" << @path.realpath.to_s
+    @database ||= Sequel.sqlite(@path.realpath.to_s)
   end
 end
